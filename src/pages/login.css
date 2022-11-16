@@ -1,0 +1,107 @@
+.loginPage {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #282c34;
+}
+
+.form {
+  background-color: #16191d;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 275px;
+  min-height: 275px;
+  aspect-ratio: 1 / 1;
+  padding: 60px;
+  border-radius: 10px;
+  max-width: 500px;
+  max-height: 500px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 48px;
+  margin-top: 0px;
+}
+
+label {
+  padding-left: 12px;
+}
+
+.input {
+  display: flex;
+  margin-top: 5px;
+}
+
+.inputError {
+  margin-top: 3px;
+  display: flex;
+  border: 2px solid red;
+  border-radius: 50px;
+}
+
+.inputIcon {
+  color: black;
+  background-color: white;
+  font-size: 32px;
+  border-radius: 50px 0px 0px 50px;
+  aspect-ratio: 1 / 1;
+  padding-left: 10px;
+}
+
+h4 {
+  color: red;
+  overflow-wrap: break-word;
+  max-width: 380px;
+  margin: 0px;
+  font-size: 16px
+}
+
+input {
+  border: none;
+  width: 100%;
+  height: 30px;
+  border-radius: 0px 50px 50px 0px;
+  font-size: 20px;
+  padding-right: 15px
+}
+
+input:focus-visible {
+  outline: none;
+}
+
+.submitButtonCont {
+  display: flex;
+  justify-content: center;
+}
+
+button {
+  cursor: pointer;
+  width: 100px;
+  height: 30px;
+  font-size: 20px;
+  border-radius: 50px;
+  border: none;
+  background-color: white;
+  margin: 5px 0px;
+}
+
+button:disabled {
+  opacity: 50%;
+  cursor: no-drop;
+}
+
+.clearText {
+  opacity: 0%
+}
+
+.errorText {
+  opacity: 100%
+}
+
+#error404 {
+  text-align: center;
+}
