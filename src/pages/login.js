@@ -11,6 +11,7 @@ export default function Login() {
   const [valEmail, setValEmail] = useState(); // Is the email valid.
   const [password, setPassword] = useState(""); // Password inputed by user.
   const [valPassword, setValPassword] = useState(); // Is the password valid.
+  const [error, setError] = useState(false); // Error if the api call fails.
 
   // Check if the email inputed is an email useing a regex.
   function validateEmail(event) {
@@ -39,15 +40,26 @@ export default function Login() {
     setValEmail();
     setValPassword();
     if (valEmail && valPassword) {
-      axios.post('http://dev.rapptrlabs.com/Tests/scripts/user-login.php', {
-        email: email,
-        password: password
-      })
+      const qs = require('qs');
+      axios.post('http://dev.rapptrlabs.com/Tests/scripts/user-login.php', qs.stringify({ 'email': email, 'password': password }))
       .then(function (response) {
+        localStorage.setItem(
+          'RapptrLabsUser',
+          JSON.stringify({ email: email, logged_in: true })
+        )
+        if (!localStorage.getItem(email)) {
+          localStorage.setItem(
+            email,
+            JSON.stringify([])
+          )
+        }
         navigate("/list")
       })
       .catch(function (error) {
-        console.log(error);
+        setError(true)
+        setValEmail(true);
+        setValPassword(true);
+        setTimeout(() => setError(false), 5000);
       });
     }
   }
@@ -92,6 +104,7 @@ export default function Login() {
           >
             Login
           </button>
+          {error && <h4>Sorry something went wrong, please try again, or come back later.</h4>}
         </div>
       </form>
     </div>

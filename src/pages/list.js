@@ -7,17 +7,24 @@ import "./list.css";
 
 export default function List() {
   const navigate  = useNavigate();
+  const user = localStorage.getItem('RapptrLabsUser') ? JSON.parse(localStorage.getItem('RapptrLabsUser')).email : "" // Email of the current user.
   const [newToDoList, setNewToDoList] = useState([]); // List of new tasks to be added.
   const [todoList, setTodoList] = useState(() => {
-        return localStorage.getItem('toDoList') ? JSON.parse(localStorage.getItem('toDoList')) : []
+      return user ? JSON.parse(localStorage.getItem(user)) : []
     }); // List of current tasks.
+  const [searchTerm, setSearchTerm] = useState("") // Text inputed in the search input.
+
+  // If the there is no local storage item called RapptrLabsUser or the user is not logged in then send them back to the loggin page.
+  useEffect(() => {
+    if (!(localStorage.getItem('RapptrLabsUser') && JSON.parse(localStorage.getItem('RapptrLabsUser')).logged_in)) {
+      navigate("/")
+    }
+  });
 
   // Search the list of tasks for a match to the input. (Case insensitive)
-  function searchToDoList(event) {
-    const matches = JSON.parse(localStorage.getItem('toDoList')).filter(task => {
-      if (task.toLowerCase().includes(event.target.value.toLowerCase())) {
-        return true;
-      }
+  function searchToDoList(searchText) {
+    const matches = JSON.parse(localStorage.getItem(user)).filter(taskObject => {
+      return taskObject.task.toLowerCase().includes(searchText.toLowerCase())
     });
     setTodoList(matches);
   }
@@ -28,49 +35,50 @@ export default function List() {
       return index !== newTaskIndex
     }));
     if (newTask.trim().length >= 1) {
-      setTodoList(todoList => [...todoList, newTask])
-      if (localStorage.getItem('toDoList')) {
-        localStorage.setItem(
-          'toDoList',
-          JSON.stringify(JSON.parse(localStorage.getItem('toDoList')).concat(newTask))
-        )
-      } else {
-        localStorage.setItem(
-          'toDoList',
-          JSON.stringify([newTask])
-        )
+      const allTasksList = JSON.parse(localStorage.getItem(user));
+      let newTaskObject = {
+        id: allTasksList.length >= 1 ?
+            allTasksList[allTasksList.length - 1].id + 1
+          : 0,
+        task: newTask
       }
+      setTodoList(todoList => [...todoList, newTaskObject])
+      localStorage.setItem(
+        user,
+        JSON.stringify(allTasksList.concat([newTaskObject]))
+      )
+      searchToDoList(searchTerm)
     };
   }
 
   // Edit a current task.
-  function editTask(editedTask, editTaskIndex) {
-    setTodoList(todoList => todoList.map((task, index) => {
-      if (index === editTaskIndex) {
-        return editedTask
+  function editTask(editedTask, editTaskId) {
+    setTodoList(todoList => todoList.map(taskObject => {
+      if (taskObject.id === editTaskId) {
+        return {id: editTaskId, task: editedTask}
       }
-      return task
-    }))
+      return taskObject
+    }));
     localStorage.setItem(
-      'toDoList',
-      JSON.stringify(JSON.parse(localStorage.getItem('toDoList')).map((task, index) => {
-        if (index === editTaskIndex) {
-          return editedTask
+      user,
+      JSON.stringify(JSON.parse(localStorage.getItem(user)).map(taskObject => {
+        if (taskObject.id === editTaskId) {
+          return {id: editTaskId, task: editedTask}
         }
-        return task
+        return taskObject
       }))
-    )
+    );
   }
 
   // Delete a current task.
-  function deleteTask(taskDeleteIndex) {
-    setTodoList(todoList.filter((task, index) => {
-      return index !== taskDeleteIndex
+  function deleteTask(taskDeleteId) {
+    setTodoList(todoList => todoList.filter(taskObject => {
+      return taskObject.id !== taskDeleteId
     }));
     localStorage.setItem(
-      'toDoList',
-      JSON.stringify(JSON.parse(localStorage.getItem('toDoList')).filter((task, index) => {
-        return index !== taskDeleteIndex
+      user,
+      JSON.stringify(JSON.parse(localStorage.getItem(user)).filter(taskObject => {
+        return taskObject.id !== taskDeleteId
       }))
     )
   }
@@ -80,7 +88,13 @@ export default function List() {
       <div className="header">
         <button
           className="logoutButton"
-          onClick={() => navigate("/")}
+          onClick={() => {
+            navigate("/")
+            localStorage.setItem(
+              'RapptrLabsUser',
+              JSON.stringify({ email: JSON.parse(localStorage.getItem('RapptrLabsUser')).email, logged_in: false })
+            )
+          }}
         >
           Logout
         </button>
@@ -96,7 +110,10 @@ export default function List() {
             name="search"
             className="searchInput"
             placeholder="Search"
-            onChange={event => searchToDoList(event)}
+            onChange={event => {
+              setSearchTerm(event.target.value);
+              searchToDoList(event.target.value);
+            }}
           />
           <button
             className="newButton"
@@ -109,8 +126,8 @@ export default function List() {
           return <Todo key={index} taskIndex={index} task={newTask} new={true} addNewTask={addNewTask} />
         })}
 
-        {todoList.map((task, index) => {
-          return <Todo key={index} taskIndex={index} task={task} new={false} editTask={editTask} deleteTask={deleteTask} />
+        {todoList.map((taskObject, index) => {
+          return <Todo key={taskObject.id} taskIndex={taskObject.id} task={taskObject.task} new={false} editTask={editTask} deleteTask={deleteTask} />
         })}
       </div>
     </div>
